@@ -38,134 +38,160 @@
 
         .status-badge {
             display: inline-block;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 20px;
-            transition: 0.3s;
+            margin-bottom: 25px;
+            transition: all 0.5s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .status-online { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .status-offline { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .status-online { background: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid var(--success); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+        .status-offline { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
 
         .card {
             background: var(--card);
-            padding: 40px 30px;
-            border-radius: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            padding: 50px 30px;
+            border-radius: 35px;
+            box-shadow: 0 25px 60px -12px rgba(0,0,0,0.6);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
-        /* The Animated Liquid Background */
+        /* Animated Liquid Wave */
         .wave {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: var(--primary);
-            opacity: 0.1;
-            transition: height 1s ease-in-out;
+            background: linear-gradient(to top, var(--primary), rgba(56, 189, 248, 0.3));
+            opacity: 0.15;
+            transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 0;
         }
 
         .content { position: relative; z-index: 1; }
 
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 1rem; letter-spacing: 2px; margin-bottom: 30px; opacity: 0.7; }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 35px; color: var(--primary); opacity: 0.9; }
 
         .percentage {
             font-family: 'Orbitron', sans-serif;
-            font-size: 5rem;
+            font-size: 5.5rem;
             font-weight: 700;
-            margin: 10px 0;
+            margin: 15px 0;
             color: var(--primary);
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            transition: color 0.5s ease;
         }
 
         .volume-display {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 300;
             margin-bottom: 10px;
+            opacity: 0.9;
         }
 
         .timestamp {
             font-size: 0.75rem;
             opacity: 0.5;
-            margin-top: 20px;
+            margin-top: 30px;
+            font-family: monospace;
         }
 
-        /* Responsive Mobile Tweak */
-        @media (max-width: 380px) {
-            .percentage { font-size: 4rem; }
+        #offlineMsg {
+            padding: 20px 0;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 400px) {
+            .percentage { font-size: 4.5rem; }
+            .card { padding: 40px 20px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="statusTag" class="status-badge status-offline">CONNECTING...</div>
+    <div id="statusTag" class="status-badge status-offline">Initializing...</div>
     
     <div class="card">
         <div id="liquidWave" class="wave" style="height: 0%;"></div>
         
         <div class="content">
-            <h1>IV MONITORING</h1>
+            <h1>IV MONITORING SYSTEM</h1>
             
-            <div id="mainDisplay">
-                <p class="volume-display"><span id="vol">--</span> mL</p>
+            <div id="mainDisplay" style="display: none;">
+                <p class="volume-display"><span id="vol">--</span> <span style="font-size: 1rem; opacity: 0.6;">mL</span></p>
                 <div class="percentage"><span id="pct">0</span>%</div>
             </div>
 
-            <div id="offlineMsg" style="display: none;">
-                <p style="font-size: 1.2rem; color: var(--danger);">MACHINE IS OFF</p>
-                <p style="font-size: 0.9rem; opacity: 0.6; margin-top: 10px;">Check Power & Connection</p>
+            <div id="offlineMsg">
+                <p style="font-size: 1.4rem; color: var(--danger); font-weight: 600;">MACHINE IS OFF</p>
+                <p style="font-size: 0.85rem; opacity: 0.6; margin-top: 12px; line-height: 1.5;">Waiting for data from NodeMCU...<br>Check power and WiFi connection.</p>
             </div>
 
-            <p class="timestamp">Last Updated: <span id="time">Never</span></p>
+            <p class="timestamp">LAST SYNC: <span id="time">NEVER</span></p>
         </div>
     </div>
 </div>
 
 <script>
     // --- 1. CONFIGURATION ---
-    const SUPABASE_URL = "https://lufbyxzzajanmoimrhmj.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1ZmJ5eHp6YWphbm1vaW1yaG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NTQ0MDQsImV4cCI6MjA5MDQzMDQwNH0.V4WvphqA_2sEHOMkY8nf_a8cmNIRhaBS7td995A_pl8"; // Your Anon Key
-    
-    const supabase = typeof supabase !== 'undefined' ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : window['@supabase/supabase-js'].createClient(SUPABASE_URL, SUPABASE_KEY);
+    const S_URL = "https://lufbyxzzajanmoimrhmj.supabase.co";
+    const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1ZmJ5eHp6YWphbm1vaW1yaG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NTQ0MDQsImV4cCI6MjA5MDQzMDQwNH0.V4WvphqA_2sEHOMkY8nf_a8cmNIRhaBS7td995A_pl8";
 
-    async function fetchData() {
-        // Fetch the very last row from the database
-        const { data, error } = await supabase
-            .from('iv_monitoring')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(1);
+    // Renamed variable to avoid conflict with the library's internal 'supabase' name
+    let myMonitorClient;
 
-        if (error) {
-            console.error("Fetch Error:", error);
-            return;
-        }
+    try {
+        myMonitorClient = supabase.createClient(S_URL, S_KEY);
+    } catch (e) {
+        console.error("Library Init Error:", e);
+    }
 
-        if (data && data.length > 0) {
-            const latest = data[0];
-            const updatedTime = new Date(latest.created_at);
-            const now = new Date();
-            
-            // Difference in seconds
-            const diff = (now - updatedTime) / 1000;
+    async function updateDashboard() {
+        if (!myMonitorClient) return;
 
-            // If no update for 30 seconds, consider machine OFF
-            if (diff > 30) {
-                setUIOffline();
-            } else {
-                setUIOnline(latest, updatedTime);
+        try {
+            const { data, error } = await myMonitorClient
+                .from('iv_monitoring')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (error) {
+                console.error("Database Fetch Error:", error);
+                return;
             }
+
+            if (data && data.length > 0) {
+                const latestData = data[0];
+                const lastUpdated = new Date(latestData.created_at);
+                const currentTime = new Date();
+                
+                // Calculate seconds since last database entry
+                const secondsAgo = (currentTime - lastUpdated) / 1000;
+
+                // Toggle "Machine Off" if data is older than 30 seconds
+                if (secondsAgo > 30) {
+                    showOfflineUI();
+                } else {
+                    showOnlineUI(latestData, lastUpdated);
+                }
+            } else {
+                showOfflineUI(); // No data rows exist yet
+            }
+        } catch (err) {
+            console.error("Connection Error:", err);
+            showOfflineUI();
         }
     }
 
-    function setUIOnline(data, time) {
-        document.getElementById('statusTag').innerText = "LIVE DATA";
+    function showOnlineUI(data, dateObj) {
+        document.getElementById('statusTag').innerText = "SYSTEM ONLINE";
         document.getElementById('statusTag').className = "status-badge status-online";
         document.getElementById('mainDisplay').style.display = "block";
         document.getElementById('offlineMsg').style.display = "none";
@@ -173,27 +199,32 @@
         document.getElementById('vol').innerText = data.volume;
         document.getElementById('pct').innerText = data.percentage;
         document.getElementById('liquidWave').style.height = data.percentage + "%";
-        document.getElementById('time').innerText = time.toLocaleTimeString();
+        document.getElementById('time').innerText = dateObj.toLocaleTimeString();
 
-        // Change color to red if low
-        if(data.percentage <= 20) {
-            document.querySelector('.percentage').style.color = "var(--danger)";
+        // Change color to red if percentage is critical (below 20)
+        const pctEl = document.querySelector('.percentage');
+        if (data.percentage <= 20) {
+            pctEl.style.color = "var(--danger)";
+            pctEl.style.textShadow = "0 0 20px rgba(239, 68, 68, 0.4)";
         } else {
-            document.querySelector('.percentage').style.color = "var(--primary)";
+            pctEl.style.color = "var(--primary)";
+            pctEl.style.textShadow = "0 0 20px rgba(56, 189, 248, 0.3)";
         }
     }
 
-    function setUIOffline() {
-        document.getElementById('statusTag').innerText = "OFFLINE";
+    function showOfflineUI() {
+        document.getElementById('statusTag').innerText = "MACHINE OFFLINE";
         document.getElementById('statusTag').className = "status-badge status-offline";
         document.getElementById('mainDisplay').style.display = "none";
         document.getElementById('offlineMsg').style.display = "block";
         document.getElementById('liquidWave').style.height = "0%";
     }
 
-    // Refresh data every 5 seconds
-    setInterval(fetchData, 5000);
-    fetchData(); // Initial call
+    // Refresh dashboard every 0.5 seconds
+    setInterval(updateDashboard, 500);
+    
+    // Initial fetch
+    updateDashboard();
 </script>
 
 </body>
